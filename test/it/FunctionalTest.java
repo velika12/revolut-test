@@ -1,6 +1,7 @@
 package it;
 
 import controllers.routes;
+import org.junit.Before;
 import org.junit.Test;
 import repositories.AccountRepository;
 import play.Application;
@@ -20,6 +21,11 @@ import static play.test.Helpers.*;
 
 public class FunctionalTest extends WithApplication {
 
+    private Long senderId;
+    private Long receiverId;
+
+    private AccountRepository accountRepository;
+
     @Override
     protected Application provideApplication() {
         return new GuiceApplicationBuilder()
@@ -28,13 +34,16 @@ public class FunctionalTest extends WithApplication {
             .build();
     }
 
+    @Before
+    public void beforeEachTest() {
+        // Create accounts
+        this.accountRepository = app.injector().instanceOf(AccountRepository.class);
+        this.senderId = accountRepository.createAccount(BigDecimal.valueOf(10000)).orElseThrow(() -> new RuntimeException("Cannot create a new account"));
+        this.receiverId = accountRepository.createAccount(BigDecimal.ZERO).orElseThrow(() -> new RuntimeException("Cannot create a new account"));
+    }
+
     @Test
     public void testTransferReturnsOkWhenSenderHasBalanceGreaterThanSentAmount() {
-        // Create accounts
-        AccountRepository repository = app.injector().instanceOf(AccountRepository.class);
-        Long senderId = repository.createAccount(BigDecimal.valueOf(10000)).orElseThrow(() -> new RuntimeException("Cannot create a new account"));
-        Long receiverId = repository.createAccount(BigDecimal.ZERO).orElseThrow(() -> new RuntimeException("Cannot create a new account"));
-
         // Request body
         String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", senderId, receiverId, 9999);
 
@@ -50,17 +59,12 @@ public class FunctionalTest extends WithApplication {
         assertThat(Helpers.contentAsString(result), equalTo(expectedResultBody));
 
         // Check data in the database changed
-        assertThat(repository.getBalance(senderId).orElse(null), equalTo(BigDecimal.valueOf(1)));
-        assertThat(repository.getBalance(receiverId).orElse(null), equalTo(BigDecimal.valueOf(9999)));
+        assertThat(accountRepository.getBalance(senderId).orElse(null), equalTo(BigDecimal.valueOf(1)));
+        assertThat(accountRepository.getBalance(receiverId).orElse(null), equalTo(BigDecimal.valueOf(9999)));
     }
 
     @Test
     public void testTransferReturnsOkWhenSenderHasBalanceEqualToSentAmount() {
-        // Create accounts
-        AccountRepository repository = app.injector().instanceOf(AccountRepository.class);
-        Long senderId = repository.createAccount(BigDecimal.valueOf(10000)).orElseThrow(() -> new RuntimeException("Cannot create a new account"));
-        Long receiverId = repository.createAccount(BigDecimal.ZERO).orElseThrow(() -> new RuntimeException("Cannot create a new account"));
-
         // Request body
         String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", senderId, receiverId, 10000);
 
@@ -72,8 +76,8 @@ public class FunctionalTest extends WithApplication {
         assertThat(result.status(), equalTo(OK));
 
         // Check data in the database changed
-        assertThat(repository.getBalance(senderId).orElse(null), equalTo(BigDecimal.ZERO));
-        assertThat(repository.getBalance(receiverId).orElse(null), equalTo(BigDecimal.valueOf(10000)));
+        assertThat(accountRepository.getBalance(senderId).orElse(null), equalTo(BigDecimal.ZERO));
+        assertThat(accountRepository.getBalance(receiverId).orElse(null), equalTo(BigDecimal.valueOf(10000)));
     }
 
     @Test
@@ -90,9 +94,22 @@ public class FunctionalTest extends WithApplication {
     }
 
     @Test
-    public void testTransferReturnsBadRequestWhenUsersDonNotExist() {
+    public void testTransferReturnsBadRequestWhenRequestBodyContainsNegativeAmount() {
         // Request body
-        String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", 1, 2, 4000);
+        String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", senderId, receiverId, -1000);
+
+        // Send request
+        Call call = routes.Payments.transfer();
+        Result result = route(app, fakeRequest(call).bodyText(body));
+
+        // Check that response is bad
+        assertThat(result.status(), equalTo(BAD_REQUEST));
+    }
+
+    @Test
+    public void testTransferReturnsBadRequestWhenUsersDoNotExist() {
+        // Request body
+        String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", 111, 222, 4000);
 
         // Send request
         Call call = routes.Payments.transfer();
@@ -104,11 +121,6 @@ public class FunctionalTest extends WithApplication {
 
     @Test
     public void testTransferReturnsBadRequestWhenSenderHasBalanceLessThanSentAmount() {
-        // Create accounts
-        AccountRepository repository = app.injector().instanceOf(AccountRepository.class);
-        Long senderId = repository.createAccount(BigDecimal.valueOf(10000)).orElseThrow(() -> new RuntimeException("Cannot createTransaction a new account"));
-        Long receiverId = repository.createAccount(BigDecimal.ZERO).orElseThrow(() -> new RuntimeException("Cannot createTransaction a new account"));
-
         // Request body
         String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", senderId, receiverId, 10001);
 

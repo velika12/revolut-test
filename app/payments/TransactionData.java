@@ -45,7 +45,8 @@ public class TransactionData {
 
     @JsonIgnore
     public boolean isValid() {
-        return (null != senderId && null != receiverId && null != amount);
+        return (null != senderId && null != receiverId && null != amount
+            && amount.compareTo(BigDecimal.ZERO) > 0);
     }
 
 }
