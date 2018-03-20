@@ -3,6 +3,8 @@ package it;
 import controllers.routes;
 import org.junit.Before;
 import org.junit.Test;
+import play.Logger;
+import play.libs.Json;
 import repositories.AccountRepository;
 import play.Application;
 import play.Mode;
@@ -49,7 +51,7 @@ public class FunctionalTest extends WithApplication {
 
         // Send request
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyText(body));
+        Result result = route(app, fakeRequest(call).bodyText(body).header("Content-Type", "application/json"));
 
         // Check that response is ok
         assertThat(result.status(), equalTo(OK));
@@ -70,7 +72,7 @@ public class FunctionalTest extends WithApplication {
 
         // Send request
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyText(body));
+        Result result = route(app, fakeRequest(call).bodyText(body).header("Content-Type", "application/json"));
 
         // Check that response is ok
         assertThat(result.status(), equalTo(OK));
@@ -87,7 +89,7 @@ public class FunctionalTest extends WithApplication {
 
         // Send request
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyText(body));
+        Result result = route(app, fakeRequest(call).bodyText(body).header("Content-Type", "application/json"));
 
         // Check that response is bad
         assertThat(result.status(), equalTo(BAD_REQUEST));
@@ -100,7 +102,7 @@ public class FunctionalTest extends WithApplication {
 
         // Send request
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyText(body));
+        Result result = route(app, fakeRequest(call).bodyText(body).header("Content-Type", "application/json"));
 
         // Check that response is bad
         assertThat(result.status(), equalTo(BAD_REQUEST));
@@ -113,7 +115,7 @@ public class FunctionalTest extends WithApplication {
 
         // Send request
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyText(body));
+        Result result = route(app, fakeRequest(call).bodyText(body).header("Content-Type", "application/json"));
 
         // Check that response is bad
         assertThat(result.status(), equalTo(BAD_REQUEST));
@@ -126,7 +128,7 @@ public class FunctionalTest extends WithApplication {
 
         // Send request
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyText(body));
+        Result result = route(app, fakeRequest(call).bodyText(body).header("Content-Type", "application/json"));
 
         // Check that response is bad
         assertThat(result.status(), equalTo(BAD_REQUEST));
@@ -139,7 +141,7 @@ public class FunctionalTest extends WithApplication {
 
         // Send request
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyText(body));
+        Result result = route(app, fakeRequest(call).bodyText(body).header("Content-Type", "application/json"));
 
         // Check that response is bad
         assertThat(result.status(), equalTo(BAD_REQUEST));

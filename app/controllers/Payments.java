@@ -33,7 +33,7 @@ public class Payments extends Controller {
         // Parse incoming data
         TransactionData data;
         try {
-            data = mapper.readValue(request().body().asText(), TransactionData.class);
+            data = mapper.readValue(request().body().asJson().toString(), TransactionData.class);
         } catch (IOException ex) {
             Logger.error(ex.getMessage());
             return completedFuture(badRequest());

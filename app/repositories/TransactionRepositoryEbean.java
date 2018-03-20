@@ -4,6 +4,7 @@ import com.avaje.ebean.Ebean;
 import models.Account;
 import models.Transaction;
 import payments.TransactionData;
+import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
