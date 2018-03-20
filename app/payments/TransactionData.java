@@ -40,4 +40,8 @@ public class TransactionData {
         return amount;
     }
 
+    public boolean isValid() {
+        return (null != senderId && null != receiverId && null != amount);
+    }
+
 }

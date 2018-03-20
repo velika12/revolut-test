@@ -23,6 +23,11 @@ public class Payments extends Controller {
         // Parse incoming data
         TransactionData data = Json.fromJson(request().body().asJson(), TransactionData.class);
 
+        // Check received data object is what we expect
+        if (!data.isValid()) {
+            return badRequest();
+        }
+
         return paymentService.transfer(data)
             .map(result -> ok(Json.toJson(result)))
             .orElseGet(Results::badRequest);
