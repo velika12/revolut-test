@@ -1,9 +1,9 @@
-package payments;
+package repositories;
 
 import com.avaje.ebean.Ebean;
 import models.Account;
 import models.Transaction;
-import play.Logger;
+import payments.TransactionData;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
@@ -18,7 +18,7 @@ public class TransactionRepositoryEbean implements TransactionRepository {
     public TransactionRepositoryEbean(EbeanConfig ebeanConfig) {}
 
     @Override
-    public Optional<TransactionData> create(TransactionData data) {
+    public Optional<TransactionData> createTransaction(TransactionData data) {
         // Find sender and receiver in database
         Account sender = Account.find.byId(data.getSenderId());
         Account receiver = Account.find.byId(data.getReceiverId());

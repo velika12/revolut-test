@@ -8,12 +8,14 @@ import java.math.BigDecimal;
 /** Data transfer object for a transaction */
 public class TransactionData {
 
+    /** Transaction id */
     private Long id;
 
     private Long senderId;
 
     private Long receiverId;
 
+    /** Amount of money sent */
     private BigDecimal amount;
 
     public TransactionData() {}

@@ -39,6 +39,7 @@ public class Payments extends Controller {
             return badRequest();
         }
 
+        // Call internal service
         return paymentService.transfer(data)
             .map(result -> ok(Json.toJson(result)))
             .orElseGet(Results::badRequest);

@@ -1,5 +1,7 @@
 package payments;
 
+import repositories.TransactionRepository;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Optional;
@@ -17,7 +19,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Optional<TransactionData> transfer(TransactionData data) {
-        return repository.create(data);
+        return repository.createTransaction(data);
     }
 
 }

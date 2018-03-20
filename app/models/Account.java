@@ -4,9 +4,7 @@ import com.avaje.ebean.Model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import java.math.BigDecimal;
-import java.util.List;
 
 /** Basic account model */
 @Entity
@@ -20,13 +18,6 @@ public class Account extends Model {
     /** Current balance of the account */
     public BigDecimal balance;
 
-    /*@OneToMany(mappedBy = "sender")
-    public List<Transaction> sentTransactions;
-
-    @OneToMany(mappedBy = "receiver")
-    public List<Transaction> receivedTransactions;*/
-
-    /** Constructor */
     public Account(BigDecimal balance) {
         this.balance = balance;
     }
