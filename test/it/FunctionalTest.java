@@ -40,14 +40,16 @@ public class FunctionalTest extends WithApplication {
 
         // Request body
         String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", senderId, receiverId, 9999);
-        JsonNode json = Json.parse(body);
 
         // Make a request for the transfer action
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyJson(json));
+        Result result = route(app, fakeRequest(call).bodyText(body));
 
         // Check the response is ok
         assertThat(result.status(), equalTo(OK));
+
+        String expectedResultBody = String.format("{\"id\":%d,\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", 1, senderId, receiverId, 9999);
+        assertThat(Helpers.contentAsString(result), equalTo(expectedResultBody));
 
         // Check data in the database changed
         assertThat(repository.getBalance(senderId).orElse(null), equalTo(BigDecimal.valueOf(1)));
@@ -63,11 +65,10 @@ public class FunctionalTest extends WithApplication {
 
         // Request body
         String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", senderId, receiverId, 10000);
-        JsonNode json = Json.parse(body);
 
         // Make a request for the transfer action
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyJson(json));
+        Result result = route(app, fakeRequest(call).bodyText(body));
 
         // Check the response is ok
         assertThat(result.status(), equalTo(OK));
@@ -81,11 +82,10 @@ public class FunctionalTest extends WithApplication {
     public void testTransferReturnsBadRequestWhenRequestBodyIsInvalid() {
         // Request body
         String body = "{\"senderId\":null,\"receiverId\":null,\"amount\":null}";
-        JsonNode json = Json.parse(body);
 
         // Make a request for transfer action
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyJson(json));
+        Result result = route(app, fakeRequest(call).bodyText(body));
 
         // Check the response is bad
         assertThat(result.status(), equalTo(BAD_REQUEST));
@@ -95,11 +95,10 @@ public class FunctionalTest extends WithApplication {
     public void testTransferReturnsBadRequestWhenUsersDonNotExist() {
         // Request body
         String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", 1, 2, 4000);
-        JsonNode json = Json.parse(body);
 
         // Make a request for the transfer action
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyJson(json));
+        Result result = route(app, fakeRequest(call).bodyText(body));
 
         // Check the response is bad
         assertThat(result.status(), equalTo(BAD_REQUEST));
@@ -114,12 +113,24 @@ public class FunctionalTest extends WithApplication {
 
         // Request body
         String body = String.format("{\"senderId\":%d,\"receiverId\":%d,\"amount\":%d}", senderId, receiverId, 10001);
-        JsonNode json = Json.parse(body);
 
         // Make a request for the transfer action
         Call call = routes.Payments.transfer();
-        Result result = route(app, fakeRequest(call).bodyJson(json));
+        Result result = route(app, fakeRequest(call).bodyText(body));
 
+        assertThat(result.status(), equalTo(BAD_REQUEST));
+    }
+
+    @Test
+    public void testTransferReturnsBadRequestWhenRequestBodyJsonIsInvalid() {
+        // Request body
+        String body = "{:: Invalid json! }}}";
+
+        // Make a request for transfer action
+        Call call = routes.Payments.transfer();
+        Result result = route(app, fakeRequest(call).bodyText(body));
+
+        // Check the response is bad
         assertThat(result.status(), equalTo(BAD_REQUEST));
     }
 

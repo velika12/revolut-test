@@ -1,5 +1,6 @@
 package payments;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import models.Transaction;
 
 import java.math.BigDecimal;
@@ -40,6 +41,7 @@ public class TransactionData {
         return amount;
     }
 
+    @JsonIgnore
     public boolean isValid() {
         return (null != senderId && null != receiverId && null != amount);
     }

@@ -19,7 +19,6 @@ public class TransactionRepositoryEbean implements TransactionRepository {
 
     @Override
     public Optional<TransactionData> create(TransactionData data) {
-
         // Find sender and receiver in database
         Account sender = Account.find.byId(data.getSenderId());
         Account receiver = Account.find.byId(data.getReceiverId());
