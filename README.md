@@ -2,7 +2,7 @@
 
 A RESTful non-blocking API for money transfers between accounts.
 
-The project is based on Play Framework 2.5 (Java).
+The project is based on [Play Framework 2.5 (Java)](https://www.playframework.com/documentation/2.5.x/Home).
 
 ## Running tests
 To run tests checking the API use `sbt test` in the folder with the source code.
