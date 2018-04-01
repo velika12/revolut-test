@@ -30,7 +30,6 @@ public class Payments extends Controller {
 
     /** Transfer money between accounts */
     public CompletionStage<Result> transfer() {
-        // Parse incoming data
         TransactionData data;
         try {
             data = mapper.readValue(request().body().asJson().toString(), TransactionData.class);
@@ -39,12 +38,10 @@ public class Payments extends Controller {
             return completedFuture(badRequest());
         }
 
-        // Check received data object is what we expect
         if (!data.isValid()) {
             return completedFuture(badRequest());
         }
 
-        // Call internal service
         return paymentService.transfer(data)
             .thenApply(result ->
                 result.map(

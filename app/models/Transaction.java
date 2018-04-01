@@ -31,7 +31,6 @@ public class Transaction extends Model {
         this.receiver = receiver;
     }
 
-    /** Finder */
     public static final Find<Long, Transaction> find = new Find<Long, Transaction>(){};
 
 }

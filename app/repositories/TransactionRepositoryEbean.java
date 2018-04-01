@@ -4,16 +4,13 @@ import com.avaje.ebean.Ebean;
 import models.Account;
 import models.Transaction;
 import payments.TransactionData;
-import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 /** Ebean implementation of transaction repository */
@@ -21,42 +18,56 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 public class TransactionRepositoryEbean implements TransactionRepository {
 
     @Inject
-    public TransactionRepositoryEbean(EbeanConfig ebeanConfig) {
-    }
+    public TransactionRepositoryEbean(EbeanConfig ebeanConfig) {}
 
     @Override
     public CompletionStage<Optional<TransactionData>> createTransaction(TransactionData data) {
         return supplyAsync(() -> {
-            // Find sender and receiver in database
-            Account sender = Account.find.byId(data.getSenderId());
-            Account receiver = Account.find.byId(data.getReceiverId());
 
-            if (null == sender || null == receiver) {
+            if (data.getSenderId().equals(data.getReceiverId())) {
                 return Optional.empty();
             }
 
-            // Check sender has enough money on balance
-            if (sender.balance.compareTo(data.getAmount()) < 0) {
-                return Optional.empty();
-            }
+            Transaction transaction;
 
-            // Transfer money between accounts
-            sender.balance = sender.balance.subtract(data.getAmount());
-            receiver.balance = receiver.balance.add(data.getAmount());
+            Ebean.beginTransaction();
 
-            // Create a new transaction record
-            Transaction transaction = new Transaction(data.getAmount(), sender, receiver);
+            try {
+                // Find and lock records
+                Account sender = Account.find.setForUpdate(true).where().eq("id", data.getSenderId()).findUnique();
+                Account receiver = Account.find.setForUpdate(true).where().eq("id", data.getReceiverId()).findUnique();
 
-            // Save all changes to database in one transaction
-            // If transaction cannot be commited due to some exception,
-            // it is rollbacked and this exception is thrown
-            Ebean.execute(() -> {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (null == sender || null == receiver) {
+                    Ebean.rollbackTransaction();
+                    return Optional.empty();
+                }
+
+                if (sender.balance.compareTo(data.getAmount()) < 0) {
+                    Ebean.rollbackTransaction();
+                    return Optional.empty();
+                }
+
+                // Transfer money between accounts
+                sender.balance = sender.balance.subtract(data.getAmount());
+                receiver.balance = receiver.balance.add(data.getAmount());
+
+                transaction = new Transaction(data.getAmount(), sender, receiver);
+
                 transaction.save();
                 sender.save();
                 receiver.save();
-            });
 
-            // Return created transaction data on success
+                Ebean.commitTransaction();
+            } finally {
+                Ebean.endTransaction();
+            }
+
             return Optional.of(new TransactionData(transaction));
         });
     }

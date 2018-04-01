@@ -15,14 +15,13 @@ public class Account extends Model {
     @Id
     public Long id;
 
-    /** Current balance of the account */
+    /** Current balance */
     public BigDecimal balance;
 
     public Account(BigDecimal balance) {
         this.balance = balance;
     }
 
-    /** Finder */
     public static final Find<Long, Account> find = new Find<Long, Account>(){};
 
 }
